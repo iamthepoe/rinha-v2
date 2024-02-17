@@ -1,1 +1,30 @@
-console.log('Hello, World');
+require 'coffeescript/register'
+
+handle = require './handlers'
+http = require 'node:http'
+
+validateRequest = (req, res) ->
+    if !req.url then handle.notFound res
+
+    [path, entity, id, action] = req.url.split '/'
+
+    if entity isnt 'clientes' then handle.notFound res
+
+    if isNaN(+id) then handle.notFound res
+
+    if !['transacoes', 'extrato'].includes(action) then handle.notFound res
+
+    return [path, entity, id, action]
+
+server = http.createServer (req, res) ->
+    console.log req.url
+    if !req.url then handle.notFound res
+    [path, entity, id, action] = validateRequest req, res
+    
+    if action is 'transacoes' then handle.transaction req, res
+    
+    if action is 'extrato' then handle.extract req, res
+    
+    res.end();
+
+server.listen 8000
