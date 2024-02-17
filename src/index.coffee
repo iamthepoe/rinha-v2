@@ -24,7 +24,13 @@ server = http.createServer (req, res) ->
     if action is 'transacoes' then handle.transaction req, res
     
     if action is 'extrato' then handle.extract req, res
-    
+
     res.end();
 
-server.listen 8000
+initServer = (port) ->
+    server.listen port, () ->
+        console.log "Server running at http://localhost:#{port}/"
+
+initServer 8000
+
+module.exports = initServer
