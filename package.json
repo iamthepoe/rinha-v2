@@ -4,7 +4,8 @@
   "description": "implementação em nodejs para a rinha de back-end",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev": "node --watch node_modules/coffeescript/bin/coffee src/index.coffee",
+    "start": "coffee src/index.coffee"
   },
   "author": "",
   "license": "ISC",
