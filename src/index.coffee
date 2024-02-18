@@ -17,13 +17,12 @@ validateRequest = (req, res) ->
     return [path, entity, id, action]
 
 server = http.createServer (req, res) ->
-    console.log req.url
     if !req.url then handle.notFound res
     [path, entity, id, action] = validateRequest req, res
     
-    if action is 'transacoes' then handle.transaction req, res
+    if action is 'transacoes' then return handle.transaction req, res
     
-    if action is 'extrato' then handle.extract req, res
+    if action is 'extrato' then return handle.extract req, res
 
     res.end();
 

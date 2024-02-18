@@ -1,5 +1,5 @@
 require 'coffeescript/register'
-handleNotFound = require './notFound.coffee'
+handleNotFound = require '../errors/notFound.coffee'
 
 handleExtract = (req, res) ->
     if req.method isnt 'GET' then handleNotFound res
