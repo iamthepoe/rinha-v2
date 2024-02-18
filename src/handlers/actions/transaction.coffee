@@ -44,7 +44,7 @@ handleTransaction = (req, res, id) ->
 
     if transaction.tipo == "d" and (client.saldo - transaction.valor) < -client.limite
         handleUnprocessableEntity res
-        return;
+        return
     
     responses = await Promise.allSettled [insertTransaction(transaction, id), updateClientBalance(transaction, id)]
 
@@ -57,4 +57,4 @@ handleTransaction = (req, res, id) ->
     res.writeHead 200, utils.DEFAULT_HEADER
     res.end(jsonResponse)
 
-module.exports = handleTransaction;
+module.exports = handleTransaction

@@ -6,4 +6,4 @@ handleExtract = (req, res) ->
     res.statusCode = 200
     res.end()
 
-module.exports = handleExtract;
+module.exports = handleExtract

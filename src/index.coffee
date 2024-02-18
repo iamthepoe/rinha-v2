@@ -25,7 +25,7 @@ server = http.createServer (req, res) ->
         
         if action is 'extrato' then return handle.extract req, res, id
 
-        return res.end();
+        return res.end()
     catch error
         console.error error
         return handle.internalError res
