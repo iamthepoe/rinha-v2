@@ -5,7 +5,7 @@ CREATE TABLE IF NOT EXISTS clientes (
 );
 
 CREATE TABLE IF NOT EXISTS transacoes (
-    pessoa_id int NOT NULL,
+    cliente_id int NOT NULL,
     valor int NOT NULL,
     tipo CHAR(1) NOT NULL,
     descricao varchar(10) NOT NULL,
