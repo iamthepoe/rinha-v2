@@ -9,29 +9,31 @@ handleInternalError = require '../errors/internalError.coffee'
 sql = require '../../connections/postgres.coffee'
 utils = require '../../utils/utils.coffee'
 
-validateTransaction = (transaction, res) ->
+validateTransaction = (transaction, res, id) ->
     data = JSON.parse transaction
+    fieldIsMissing = !data?.valor || !data?.descricao || !data?.tipo
     valueIsInvalid = data?.valor <= 0
     typeIsInvalid = !['c', 'd'].includes data?.tipo
     descriptionIsInvalid = data?.descricao?.length < 1 or data?.descricao?.length > 10
-
-    if valueIsInvalid or typeIsInvalid or descriptionIsInvalid
+    idIsNaN = isNaN(+id)
+    isInvalidTransaction = valueIsInvalid or typeIsInvalid or descriptionIsInvalid or idIsNaN or fieldIsMissing
+    
+    if isInvalidTransaction
         handleBadRequest res
         return false
     
     return data
 
-insertTransaction = (transaction, id) -> 
-    return sql"INSERT INTO transacoes (cliente_id, valor, tipo, descricao) VALUES (#{id}, #{transaction.valor}, #{transaction.tipo}, #{transaction.descricao})"
+callTransactionProcedure = (transaction, id) ->
+    return sql"CALL PROCESSAR_TRANSACAO(#{id}, #{transaction.descricao}, #{transaction.tipo}, #{transaction.valor}, 0::varchar)"
 
-updateClientBalance = (transaction, id) ->
-    return sql"UPDATE clientes SET saldo = saldo - #{transaction.valor} WHERE id=#{id}"
+getNewBalance = (transactionProcedureData) -> return transactionProcedureData[0].result.split ':'
 
 handleTransaction = (req, res, id) ->
     if req.method isnt 'POST' then return handleNotFound res
     
     data = await once req, 'data'
-    transaction = validateTransaction data, res
+    transaction = validateTransaction data, res, id
     
     if !transaction
         return
@@ -46,13 +48,14 @@ handleTransaction = (req, res, id) ->
         handleUnprocessableEntity res
         return
     
-    responses = await Promise.allSettled [insertTransaction(transaction, id), updateClientBalance(transaction, id)]
+    procedureResponse = await callTransactionProcedure(transaction, id)
+    [saldo, limite] = getNewBalance procedureResponse
 
-    if responses[0].status == 'rejected' or responses[1].status == 'rejected'
+    if procedureResponse.status == 'rejected'
         handleInternalError res
         return
     
-    jsonResponse = JSON.stringify { saldo: client.saldo - transaction.valor, limite: client.limite }
+    jsonResponse = JSON.stringify { saldo: Number(saldo), limite: Number(limite) }
 
     res.writeHead 200, utils.DEFAULT_HEADER
     res.end(jsonResponse)

@@ -1,3 +1,5 @@
+--inspired/stolen from H4ad, who stole/was inspired by that guy who knows a lot of C#, and he forgot his name
+
 CREATE TABLE IF NOT EXISTS clientes (
     id INT NOT NULL PRIMARY KEY,
     limite int NOT NULL CHECK (limite > 0),
@@ -19,3 +21,33 @@ VALUES
     (3, 1000000, 0),
     (4, 10000000, 0),
     (5, 500000, 0);
+
+CREATE OR REPLACE PROCEDURE PROCESSAR_TRANSACAO(
+    cliente_id INT,
+    descricao VARCHAR(10),
+    tipo CHAR(1),
+    valor INT,
+    INOUT result VARCHAR(255)
+)
+LANGUAGE plpgsql
+AS $$
+DECLARE
+    var_saldo INT;
+    var_limite INT;
+BEGIN
+    IF tipo = 'c' THEN
+        UPDATE clientes SET saldo = saldo + valor WHERE id = cliente_id RETURNING saldo, limite INTO var_saldo, var_limite;
+    ELSE
+        UPDATE clientes SET saldo = saldo - valor WHERE id = cliente_id RETURNING saldo, limite INTO var_saldo, var_limite;
+    END IF;
+
+    IF NOT FOUND THEN
+        result = "-1"
+        RETURN;
+    ELSE
+        INSERT INTO transacoes (cliente_id, valor, tipo, descricao) VALUES (cliente_id, valor, tipo, descricao);
+        COMMIT;
+        result = CONCAT(var_saldo::varchar, ':', var_limite::varchar);
+    END IF;
+END;
+$$;

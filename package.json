@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "dev": "node --watch node_modules/coffeescript/bin/coffee src/index.coffee",
-    "start": "coffee src/index.coffee"
+    "start": "coffee src/index.coffee",
+    "test": "coffee tests/test-e2e.coffee"
   },
   "author": "",
   "license": "ISC",
