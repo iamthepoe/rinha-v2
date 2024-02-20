@@ -77,11 +77,3 @@ describe 'API', ()=>
         body = JSON.stringify { valor: 10, tipo: 'd', descricao: '12345678910' }
         res = await fetch "#{URL}/clientes/#{id}/transacoes", { method: 'POST', body }
         strictEqual res.status, 400
-
-    
-
-        
-
-    
-    
-    
